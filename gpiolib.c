@@ -49,7 +49,7 @@ static unsigned char BusMode;         // global to remember status of gpio lines
 #define CMD_STARTCONPUL  0xA0
 #define CMD_STARTROPUL   0xA8
 #define CMD_SETSELECT    0xB0
-#define CMD_RSTBPULSE    0xD8
+#define CMD_RSTBPULSE    0xB8
 #define CMD_READSTATUS   0xC0
 #define CMDH_READSTATUS  0x18
 #define CMD_LOOPBRFIFO   0xF0
@@ -161,11 +161,13 @@ int send_command(unsigned char c)
   bcm2835_gpio_write(RWpin, LOW);
   bcm2835_gpio_write(STpin, LOW);
   bcm2835_gpio_write(STpin, LOW);
+  bcm2835_gpio_write(STpin, LOW);
   lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is LOW
   if(lev == HIGH) {
     NoAck = true;
-    printf("\n Send Cmd, No ACK = 0");
+    printf("\n Send Command, ST = 0, NO ACK -> 0 transition\n");
   }
+  bcm2835_gpio_write(STpin, HIGH);
   bcm2835_gpio_write(STpin, HIGH);
   bcm2835_gpio_write(STpin, HIGH);
   bcm2835_gpio_write(RWpin, HIGH);
@@ -173,7 +175,7 @@ int send_command(unsigned char c)
   lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is HIGH
   if(lev == LOW) {
     NoAck = true;
-    printf("\n Send Cmd, No ACK = 1");
+    printf("\n Send Command, ST = 1, NO ACK -> 1 transition\n");
   }
   if(NoAck){
     return(-1);
@@ -208,11 +210,13 @@ int fixed_acquisition(void)
   bcm2835_gpio_write(RWpin, LOW);
   bcm2835_gpio_write(STpin, LOW);
   bcm2835_gpio_write(STpin, LOW);
+  bcm2835_gpio_write(STpin, LOW);
   lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is LOW
   if(lev == HIGH) {
     NoAck = true;
-    printf("\n Send Cmd, No ACK = 0");
+    printf("\n Fixed Acquisition, ST = 0, NO ACK -> 0 transition\n");
   }
+  bcm2835_gpio_write(STpin, HIGH);
   bcm2835_gpio_write(STpin, HIGH);
   bcm2835_gpio_write(STpin, HIGH);
   bcm2835_gpio_write(RWpin, HIGH);
@@ -220,7 +224,7 @@ int fixed_acquisition(void)
   lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is HIGH
   if(lev == LOW) {
     NoAck = true;
-    printf("\n Send Cmd, No ACK = 1");
+    printf("\n Fixed Acquisition, ST = 1, NO ACK -> 1 transition\n");
   }
   if(NoAck){
     return(-1);
@@ -256,6 +260,7 @@ int set_dac_high_word(unsigned char c)
   lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is LOW
   if(lev == HIGH) {
     NoAck = true;
+    printf("\n Set DAC high word, ST = 0, NO ACK -> 0 transition\n");
   }
   bcm2835_gpio_write(STpin, HIGH);
   bcm2835_gpio_write(STpin, HIGH);
@@ -264,6 +269,7 @@ int set_dac_high_word(unsigned char c)
   lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is HIGH
   if(lev == LOW) {
     NoAck = true;
+    printf("\n Set DAC high word, ST = 1, NO ACK -> 1 transition\n");
   }
   if(NoAck){
     return(-1);
@@ -299,6 +305,7 @@ int set_dac_low_word(unsigned char c)
   lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is LOW
   if(lev == HIGH) {
     NoAck = true;
+    printf("\n Set DAC low word, ST = 0, NO ACK -> 0 transition\n");
   }
   bcm2835_gpio_write(STpin, HIGH);
   bcm2835_gpio_write(STpin, HIGH);
@@ -307,6 +314,7 @@ int set_dac_low_word(unsigned char c)
   lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is HIGH
   if(lev == LOW) {
     NoAck = true;
+    printf("\n Set DAC low word, ST = 1, NO ACK -> 1 transition\n");
   }
   if(NoAck){
     return(-1);
@@ -342,6 +350,7 @@ int set_trigger_delay(unsigned char c)
   lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is LOW
   if(lev == HIGH) {
     NoAck = true;
+    printf("\n Set Trigger Delay, ST = 0, NO ACK -> 0 transition\n");
   }
   bcm2835_gpio_write(STpin, HIGH);
   bcm2835_gpio_write(STpin, HIGH);
@@ -350,6 +359,7 @@ int set_trigger_delay(unsigned char c)
   lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is HIGH
   if(lev == LOW) {
     NoAck = true;
+    printf("\n Set Trigger Delay, ST = 1, NO ACK -> 1 transition\n");
   }
   if(NoAck){
     return(-1);
@@ -377,10 +387,11 @@ int read_command(void)
   bcm2835_gpio_write(RWpin, HIGH);
   bcm2835_gpio_write(STpin, LOW);
   bcm2835_gpio_write(STpin, LOW);
+  bcm2835_gpio_write(STpin, LOW);
   lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is LOW
   if(lev == HIGH) {
     NoAck = true;
-    printf("\n Read Cmd, No ACK = 0");
+    printf("\n Read Command, ST = 0, NO ACK -> 0 transition\n");
   }
   r = 0;
   l = bcm2835_gpio_lev(D0pin);
@@ -403,11 +414,12 @@ int read_command(void)
   result = (int) r;
   bcm2835_gpio_write(STpin, HIGH);
   bcm2835_gpio_write(STpin, HIGH);
+  bcm2835_gpio_write(STpin, HIGH);
 
   lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is HIGH
   if(lev == LOW) {
     NoAck = true;
-    printf("\n Read Cmd, No ACK = 1");
+    printf("\n Read Command, ST = 1, NO ACK -> 1 transition\n");
   }
   if(NoAck){
     return(-1);
@@ -438,6 +450,7 @@ int read_usedwl(){
   lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is LOW
   if(lev == HIGH) {
     NoAck = true;
+    printf("\n Read used word, ST = 0, NO ACK -> 0 transition\n");
   }
   r = 0;
   l = bcm2835_gpio_lev(D0pin);
@@ -464,6 +477,7 @@ int read_usedwl(){
   lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is HIGH
   if(lev == LOW) {
     NoAck = true;
+    printf("\n Read used word low, ST = 1, NO ACK -> 1 transition\n");
   }
   if(NoAck){
     return(-1);
@@ -494,6 +508,7 @@ int read_usedwh(){
   lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is LOW
   if(lev == HIGH) {
     NoAck = true;
+    printf("\n Read used word high, ST = 0, NO ACK -> 0 transition\n");
   }
   r = 0;
   l = bcm2835_gpio_lev(D0pin);
@@ -520,6 +535,7 @@ int read_usedwh(){
   lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is HIGH
   if(lev == LOW) {
     NoAck = true;
+    printf("\n Read used word high, ST = 1, NO ACK -> 1 transition\n");
   }
   if(NoAck){
     return(-1);
@@ -555,17 +571,21 @@ bcm2835_gpio_write(D0pin, ( c    &1));
 
   bcm2835_gpio_write(STpin, LOW);
   bcm2835_gpio_write(STpin, LOW);
+  bcm2835_gpio_write(STpin, LOW);
   lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is LOW
   if(lev == HIGH) {
     NoAck = true;
+    printf("\n Write local fifo, ST = 0, NO ACK -> 0 transition\n");
   }
 
+  bcm2835_gpio_write(STpin, HIGH);
   bcm2835_gpio_write(STpin, HIGH);
   bcm2835_gpio_write(STpin, HIGH);
 
   lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is HIGH
   if(lev == LOW) {
     NoAck = true;
+    printf("\n Write local fifo, ST = 1, NO ACK -> 1 transition\n");
   }
   if(NoAck){
     return(-1);
@@ -592,9 +612,11 @@ int read_local_fifo(){
 
   bcm2835_gpio_write(STpin, LOW);
   bcm2835_gpio_write(STpin, LOW);
+  bcm2835_gpio_write(STpin, LOW);
   lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is LOW
   if(lev == HIGH) {
     NoAck = true;
+    printf("\n Read local fifo, ST = 0, NO ACK -> 0 transition\n");
   }
   r = 0;
   l = bcm2835_gpio_lev(D0pin);
@@ -618,10 +640,12 @@ int read_local_fifo(){
   
   bcm2835_gpio_write(STpin, HIGH);
   bcm2835_gpio_write(STpin, HIGH);
+  bcm2835_gpio_write(STpin, HIGH);
 
   lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is HIGH
   if(lev == LOW) {
     NoAck = true;
+    printf("\n Read local fifo, ST = 1, NO ACK -> 1 transition");
   }
 
   return(result);
@@ -642,12 +666,39 @@ void ConvertProgrStrBytetoBit(unsigned char * bytes, unsigned char * bits)
 	}
 }
 
+// converts the programming sequence of 48*4 bytes into 1536 single bytes where the LSB is 
+// the bit to be programmed
+void ConvertProgrStrBytetoBit_4chips(unsigned char * bytes, unsigned char * bits)
+{
+	int i, j;
+	unsigned char b;
+	for (i = 0; i < 192; i = i + 1){
+		b = *(bytes + sizeof(unsigned char) * i);
+		for(j = 0; j < 8; j = j + 1){
+			*(bits + sizeof(unsigned char) * j + sizeof(unsigned char) * i * 8) = 1 & (b >> (7-j));	
+		}	
+	}
+}
 
 void ConvertProgrStrBittoByte(unsigned char * bits, unsigned char * bytes)
 {
 	int i, j;
 	unsigned char b;
 	for (i = 0; i < 48; i = i + 1){
+		b = 0;
+		for(j = 0; j < 8; j = j + 1){
+			b = b | ( *(bits + sizeof(unsigned char) * i*8 + sizeof(unsigned char) * j) << (7 - j));			
+		}
+		*(bytes + sizeof(unsigned char) * i) = b;	
+	}
+}
+
+// Converts a string of bits in a string of bytes (4 chips)
+void ConvertProgrStrBittoByte_4chips(unsigned char * bits, unsigned char * bytes)
+{
+	int i, j;
+	unsigned char b;
+	for (i = 0; i < 192; i = i + 1){
 		b = 0;
 		for(j = 0; j < 8; j = j + 1){
 			b = b | ( *(bits + sizeof(unsigned char) * i*8 + sizeof(unsigned char) * j) << (7 - j));			
@@ -685,12 +736,39 @@ int prog384(unsigned char * pNew, unsigned char * pPrevious)
 	return(0);
 }
 
-int progandverify384(unsigned char * pNew, unsigned char * pPrevious)
+// program the 192 bytes configuration string into the SK2 3 bits at a time
+// and return pointer to previous configuration string, assumes pointing to bit sequence
+int prog384_4chips(unsigned char * pNew, unsigned char * pPrevious)
+{
+	int chip, bit, j, byte_index, bit_index;
+	unsigned char bit2, bit1, bit0, bits, cmd;
+	unsigned char dout;
+	for(bit = 0; bit < 1536; bit = bit + 3){
+			bit2 = *(pNew + sizeof(unsigned char) * bit + 0);
+			bit1 = *(pNew + sizeof(unsigned char) * bit + 1);
+			bit0 = *(pNew + sizeof(unsigned char) * bit + 2);
+			bits = (bit2 << 2) | (bit1 << 1) | bit0;
+			cmd = CMD_WRPRBITS | bits;
+			send_command(cmd);
+			dout = read_command();
+			bits = dout & 7;
+			bit2 = (bits >> 2) & 1;
+			bit1 = (bits >> 1) & 1;
+			bit0 = bits & 1;
+			*(pPrevious + sizeof(unsigned char) * bit + 0) = bit2;
+			*(pPrevious + sizeof(unsigned char) * bit + 1) = bit1;
+			*(pPrevious + sizeof(unsigned char) * bit + 2) = bit0;
+	}
+	return(0);
+}
+
+
+/*int progandverify384(unsigned char * pNew, unsigned char * pPrevious)
 {
 	prog384(pNew, pPrevious);
 	prog384(pNew, pPrevious);
 	return(0);
-}
+}*/
 
 
 int progandverify48(unsigned char * pConfBytes, unsigned char * pPrevious)
@@ -708,6 +786,36 @@ int progandverify48(unsigned char * pConfBytes, unsigned char * pPrevious)
 	return(0);
 }
 
+int progandverify48_4chips(unsigned char * pConfBytes, unsigned char * pPrevious)
+{
+	unsigned char *pNewConfBits ;  
+	unsigned char *pOldConfBits ;
+	pNewConfBits = (unsigned char *) malloc(sizeof(unsigned char) * 384 * 4);
+	pOldConfBits = (unsigned char *) malloc(sizeof(unsigned char) * 384 * 4);
+	ConvertProgrStrBytetoBit_4chips( pConfBytes, pNewConfBits);
+	prog384_4chips(pNewConfBits, pOldConfBits);
+	prog384_4chips(pNewConfBits, pOldConfBits);
+	ConvertProgrStrBittoByte_4chips(pOldConfBits, pPrevious);
+	free(pNewConfBits);
+	free(pOldConfBits);
+	return(0);
+}
+
+int read_configuration_string(unsigned char * pConfBytes, unsigned char * pPrevious)
+{
+	unsigned char *pNewConfBits ;  
+	unsigned char *pOldConfBits ;
+	pNewConfBits = (unsigned char *) malloc(sizeof(unsigned char) * 384 * 4);
+	pOldConfBits = (unsigned char *) malloc(sizeof(unsigned char) * 384 * 4);
+	ConvertProgrStrBytetoBit_4chips( pConfBytes, pNewConfBits);
+	prog384_4chips(pNewConfBits, pOldConfBits);
+	ConvertProgrStrBittoByte_4chips(pOldConfBits, pPrevious);
+	free(pNewConfBits);
+	free(pOldConfBits);
+	return(0);
+}
+
+
 int calib_gen(){
   bool NoAck;
   unsigned char lev;
@@ -721,12 +829,48 @@ int calib_gen(){
   lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is LOW
   if(lev == HIGH) {
     NoAck = true;
+    printf("\n Calibration Pulse Gen, ST = 0, NO ACK -> 0 transition\n");
   }
   bcm2835_gpio_write(STpin, HIGH);
   bcm2835_gpio_write(STpin, HIGH);
   lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is HIGH
   if(lev == LOW) {
     NoAck = true;
+    printf("\n Calibration Pulse Gen, ST = 1, NO ACK -> 1 transition\n");
+  }
+  if(NoAck){
+    return(-1);
+  }
+  else {
+    return(0);
+  }
+  bcm2835_gpio_write(RWpin, HIGH);
+  
+}
+
+
+
+int instrumental_trigger(){
+  bool NoAck;
+  unsigned char lev;
+  bcm2835_gpio_write(AD0pin, LOW);
+  bcm2835_gpio_write(AD1pin, HIGH);
+  bcm2835_gpio_write(AD2pin, LOW);
+  bcm2835_gpio_write(AD3pin, HIGH);
+  bcm2835_gpio_write(RWpin, LOW);
+  bcm2835_gpio_write(STpin, LOW);
+  bcm2835_gpio_write(STpin, LOW);
+  lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is LOW
+  if(lev == HIGH) {
+    NoAck = true;
+    printf("\n Calibration Pulse Gen, ST = 0, NO ACK -> 0 transition\n");
+  }
+  bcm2835_gpio_write(STpin, HIGH);
+  bcm2835_gpio_write(STpin, HIGH);
+  lev = bcm2835_gpio_lev(	ACKpin	);	                // check that ACK is HIGH
+  if(lev == LOW) {
+    NoAck = true;
+    printf("\n Calibration Pulse Gen, ST = 1, NO ACK -> 1 transition\n");
   }
   if(NoAck){
     return(-1);
